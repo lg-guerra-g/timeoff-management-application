@@ -1,133 +1,143 @@
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "3.14.0"
-  name    = "gorilla-vpc"
-  cidr    = "10.0.0.0/16"
-
-  azs             = ["us-west-2a", "us-west-2b", "us-west-2c"]
-  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-  public_subnets  = ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
-
-  enable_dns_hostnames          = true
-  enable_nat_gateway            = true
-  single_nat_gateway            = true
-  manage_default_network_acl    = true
-  public_dedicated_network_acl  = true
-  private_dedicated_network_acl = true
-  private_inbound_acl_rules = [{ "cidr_block" : "10.0.0.0/16", "from_port" : 0, "protocol" : "-1", "rule_action" : "allow", "rule_number" : 100, "to_port" : 0 },
-  { "cidr_block" : "0.0.0.0/0", "from_port" : 1024, "protocol" : "tcp", "rule_action" : "allow", "rule_number" : 200, "to_port" : 65535 }]
+resource "aws_elastic_beanstalk_application" "timeoff_mgmt_app" {
+  name        = "timeoff-management-application"
+  description = "Timeoff management app"
 }
 
-resource "aws_security_group" "vpcendpoint_sg" {
-  name        = "vpcendpoint-sg"
-  description = "SG for VPC endpoint usage"
-  vpc_id      = module.vpc.vpc_id
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [module.vpc.vpc_cidr_block]
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  tags = {
-    Name = "vpcendpoint-sg"
-  }
-}
+# resource "aws_elastic_beanstalk_environment" "timeoff_mgmt_env" {
+#   name = "timeoff-env"
+#   application = aws_elastic_beanstalk_application.timeoff_mgmt_app.name
+#   cname_prefix = "luisguerra-timeoff"
+#   solution_stack_name = "64bit Amazon Linux 2 v3.4.16 running Docker"
 
-resource "aws_vpc_endpoint" "cloudformation" {
-  vpc_id              = module.vpc.vpc_id
-  subnet_ids          = module.vpc.private_subnets
-  service_name        = "com.amazonaws.us-west-2.cloudformation"
-  vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.vpcendpoint_sg.id]
-  private_dns_enabled = true
-  tags = {
-    Name = "Cloudformation-vpc-endpoint"
-  }
-}
+#   setting {
+#     namespace = "aws:autoscaling:launchconfiguration"
+#     name      = "DisableIMDSv1"
+#     value     = "true"
+#   }
 
-resource "aws_vpc_endpoint" "ecr" {
-  vpc_id              = module.vpc.vpc_id
-  subnet_ids          = module.vpc.private_subnets
-  service_name        = "com.amazonaws.us-west-2.ecr.api"
-  vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.vpcendpoint_sg.id]
-  private_dns_enabled = true
-  tags = {
-    Name = "ecr-vpc-endpoint"
-  }
-}
+#   setting {
+#     namespace = "aws:autoscaling:launchconfiguration"
+#     name      = "EC2KeyName"
+#     value     = "mac-key"
+#   }
 
-resource "aws_vpc_endpoint" "ecr_dkr" {
-  vpc_id              = module.vpc.vpc_id
-  subnet_ids          = module.vpc.private_subnets
-  service_name        = "com.amazonaws.us-west-2.ecr.dkr"
-  vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.vpcendpoint_sg.id]
-  private_dns_enabled = true
-  tags = {
-    Name = "ecr-dkr-vpc-endpoint"
-  }
-}
+#   setting {
+#     namespace = "aws:autoscaling:launchconfiguration"
+#     name      = "IamInstanceProfile"
+#     value     = "aws-elasticbeanstalk-ec2-role"
+#   }
 
-resource "aws_vpc_endpoint" "elasticbeanstalk" {
-  vpc_id              = module.vpc.vpc_id
-  subnet_ids          = module.vpc.private_subnets
-  service_name        = "com.amazonaws.us-west-2.elasticbeanstalk"
-  vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.vpcendpoint_sg.id]
-  private_dns_enabled = true
-  tags = {
-    Name = "elasticbeanstalk-vpc-endpoint"
-  }
-}
+#   setting {
+#     namespace = "aws:autoscaling:launchconfiguration"
+#     name      = "InstanceType"
+#     value     = "t2.micro"
+#   }
 
-resource "aws_vpc_endpoint" "elasticbeanstalk_health" {
-  vpc_id              = module.vpc.vpc_id
-  subnet_ids          = module.vpc.private_subnets
-  service_name        = "com.amazonaws.us-west-2.elasticbeanstalk-health"
-  vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.vpcendpoint_sg.id]
-  private_dns_enabled = true
-  tags = {
-    Name = "elasticbeanstalk-health-vpc-endpoint"
-  }
-}
+#   setting {
+#     namespace = "aws:autoscaling:launchconfiguration"
+#     name      = "SSHSourceRestriction"
+#     value     = "tcp,22,22,0.0.0.0/0"
+#   }
 
-resource "aws_vpc_endpoint" "s3" {
-  vpc_id             = module.vpc.vpc_id
-  subnet_ids         = module.vpc.private_subnets
-  service_name       = "com.amazonaws.us-west-2.s3"
-  vpc_endpoint_type  = "Interface"
-  security_group_ids = [aws_security_group.vpcendpoint_sg.id]
-  tags = {
-    Name = "s3-interface-vpc-endpoint"
-  }
-}
+#   setting {
+#     namespace = "aws:autoscaling:launchconfiguration"
+#     name      = "SecurityGroups"
+#     value     = "${aws_security_group.app_sg.id}"
+#   }
 
-resource "aws_vpc_endpoint" "sqs" {
-  vpc_id              = module.vpc.vpc_id
-  subnet_ids          = module.vpc.private_subnets
-  service_name        = "com.amazonaws.us-west-2.sqs"
-  vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.vpcendpoint_sg.id]
-  private_dns_enabled = true
-  tags = {
-    Name = "sqs-vpc-endpoint"
-  }
-}
+#   setting {
+#     namespace = "aws:ec2:instances"
+#     name      = "InstanceTypes"
+#     value     = "t2.micro, t2.small"
+#   }
 
-resource "aws_vpc_endpoint" "s3_gateway" {
-  vpc_id            = module.vpc.vpc_id
-  service_name      = "com.amazonaws.us-west-2.s3"
-  vpc_endpoint_type = "Gateway"
-  route_table_ids   = module.vpc.private_route_table_ids
-  tags = {
-    Name = "s3-gateway-vpc-endpoint"
-  }
-}
+#   setting {
+#     namespace = "aws:ec2:instances"
+#     name      = "SupportedArchitectures"
+#     value     = "x86_64"
+#   }
+
+#   setting {
+#     namespace = "aws:ec2:vpc"
+#     name      = "AssociatePublicIpAddress"
+#     value     = "false"
+#   }
+
+#   setting {
+#     namespace = "aws:ec2:vpc"
+#     name      = "ELBScheme"
+#     value     = "public"
+#   }
+
+#   setting {
+#     namespace = "aws:ec2:vpc"
+#     name      = "ELBSubnets"
+#     value     = "${module.vpc.public_subnets}"
+#   }
+
+#   setting {
+#     namespace = "aws:ec2:vpc"
+#     name      = "Subnets"
+#     value     = "${module.vpc.private_subnets}"
+#   }
+
+#   setting {
+#     namespace = "aws:ec2:vpc"
+#     name      = "VPCId"
+#     value     = "${module.vpc.vpc_id}"
+#   }
+
+#   setting {
+#     namespace = "aws:elasticbeanstalk:command"
+#     name      = "IgnoreHealthCheck"
+#     value     = "true"
+#   }
+
+#   setting {
+#     namespace = "aws:elasticbeanstalk:environment"
+#     name      = "LoadBalancerType"
+#     value     = "application"
+#   }
+
+#   setting {
+#     namespace = "aws:elasticbeanstalk:environment"
+#     name      = "ServiceRole"
+#     value     = "aws-elasticbeanstalk-service-role"
+#   }
+
+#   setting {
+#     namespace = "aws:elasticbeanstalk:environment:proxy"
+#     name      = "ProxyServer"
+#     value     = "nginx"
+#   }
+
+#   setting {
+#     namespace = "aws:elasticbeanstalk:healthreporting:system"
+#     name      = "SystemType"
+#     value     = "enhanced"
+#   }
+
+#   setting {
+#     namespace = "aws:elasticbeanstalk:managedactions"
+#     name      = "ManagedActionsEnabled"
+#     value     = "true"
+#   }
+
+#   setting {
+#     namespace = "aws:elasticbeanstalk:managedactions"
+#     name      = "PreferredStartTime"
+#     value     = "Sat:18:00"
+#   }
+
+#   setting {
+#     namespace = "aws:elasticbeanstalk:managedactions"
+#     name      = "ServiceRoleForManagedUpdates"
+#     value     = "aws-elasticbeanstalk-service-role"
+#   }
+
+#   setting {
+#     namespace = "aws:elasticbeanstalk:managedactions:platformupdate"
+#     name      = "UpdateLevel"
+#     value     = "minor"
+#   }
+# }
