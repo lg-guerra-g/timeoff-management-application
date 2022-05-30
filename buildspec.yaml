@@ -1,0 +1,15 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - docker build --tag timeoff:latest .
+      - docker tag timeoff:latest 593526201844.dkr.ecr.us-west-2.amazonaws.com/timeoff:latest
+      - docker tag timeoff:latest 593526201844.dkr.ecr.us-west-2.amazonaws.com/timeoff:$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 593526201844.dkr.ecr.us-west-2.amazonaws.com
+      - docker push 593526201844.dkr.ecr.us-west-2.amazonaws.com/timeoff:latest
+      - docker push 593526201844.dkr.ecr.us-west-2.amazonaws.com/timeoff:$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - envsubst < "dockerrun.template.json" > "Dockerrun.aws.json"
+      - aws s3 cp Dockerrun.aws.json s3://lguerratest/gorilla-test/
+      - aws elasticbeanstalk create-application-version --application-name timeoff-management-application --source-bundle S3Bucket="lguerratest",S3Key="gorilla-test/Dockerrun.aws.json" --version-label "timeoff-$CODEBUILD_RESOLVED_SOURCE_VERSION" --description "commit-id-$CODEBUILD_RESOLVED_SOURCE_VERSION"
+      - aws elasticbeanstalk update-environment --environment-name timeoff-env --version-label "timeoff-$CODEBUILD_RESOLVED_SOURCE_VERSION"
