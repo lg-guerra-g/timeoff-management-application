@@ -23,6 +23,17 @@ resource "aws_iam_role_policy" "timeoff_mgmt_policy" {
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Effect": "Allow",
+      "Resource": [
+        "*"
+      ],
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ]
+    },
+    {
       "Sid": "Stmt1653878744732",
       "Action": [
         "s3:GetObject",
@@ -54,6 +65,13 @@ resource "aws_iam_role_policy" "timeoff_mgmt_policy" {
       ],
       "Effect": "Allow",
       "Resource": "arn:aws:elasticbeanstalk:us-west-2:593526201844:environment/*"
+    },
+    {
+      "Action": [
+        "ecr:GetAuthorizationToken"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
     }
   ]
 }

@@ -14,7 +14,7 @@
 # 4. Login to running container (to update config (vi config/app.json):
 #	docker exec -ti --user root alpine_timeoff /bin/sh
 # --------------------------------------------------------------------
-FROM ubuntu:18.04
+FROM public.ecr.aws/ubuntu/ubuntu:18.04
 
 RUN apt-get update
 RUN apt-get -y install curl gnupg
