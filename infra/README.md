@@ -1,3 +1,10 @@
+## Architecture
+![Architecture](../.md/timeoffArchotecture.png)
+
+## URLs
+* HTTP - http://luisguerra-timeoff.us-west-2.elasticbeanstalk.com
+* HTTPS - https://d1v7s7tqi50pcn.cloudfront.net/login/
+
 ## Requirements
 
 | Name | Version |

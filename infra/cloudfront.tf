@@ -20,7 +20,16 @@ resource "aws_cloudfront_distribution" "timeoff_distr" {
     target_origin_id       = "timeoff-beanstalk"
     viewer_protocol_policy = "allow-all"
     compress               = true
-    cache_policy_id        = data.aws_cloudfront_cache_policy.optimized.id
+    response_headers_policy_id = "60669652-455b-4ae9-85a4-c4c02393f86c"
+    forwarded_values {
+      headers = ["*"]
+      query_string = true
+      query_string_cache_keys = []
+      cookies {
+        forward = "all"
+        whitelisted_names = []
+      }
+    }
   }
 
   viewer_certificate {
