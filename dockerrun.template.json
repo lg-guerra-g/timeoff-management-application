@@ -1,7 +1,7 @@
 {
     "AWSEBDockerrunVersion": "1",
     "Image": {
-      "Name": "593526201844.dkr.ecr.us-west-2.amazonaws.com/timeoff:416bd87081345edd984e46788e3a31c7678dbd24",
+      "Name": "593526201844.dkr.ecr.us-west-2.amazonaws.com/timeoff:$CODEBUILD_RESOLVED_SOURCE_VERSION",
       "Update": "true"
     },
     "Ports": [
