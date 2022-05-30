@@ -40,7 +40,7 @@ resource "aws_security_group" "vpcendpoint_sg" {
 }
 
 resource "aws_security_group" "app_sg" {
-  name        = "ap-sg"
+  name        = "app-sg"
   description = "SG for beanstalk app"
   vpc_id      = module.vpc.vpc_id
   ingress {
@@ -80,7 +80,7 @@ resource "aws_security_group" "app_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name = "vpcendpoint-sg"
+    Name = "app-sg"
   }
 }
 
