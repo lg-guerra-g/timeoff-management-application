@@ -45,7 +45,13 @@ resource "aws_iam_role_policy" "timeoff_mgmt_policy" {
     {
       "Sid": "Stmt1653878909769",
       "Action": [
-        "ecr:PutImage"
+        "ecr:BatchGetImage",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:InitiateLayerUpload",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart"
       ],
       "Effect": "Allow",
       "Resource": "arn:aws:ecr:us-west-2:593526201844:repository/timeoff"
@@ -56,15 +62,7 @@ resource "aws_iam_role_policy" "timeoff_mgmt_policy" {
         "elasticbeanstalk:CreateApplicationVersion"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:elasticbeanstalk:us-west-2:593526201844:application/*"
-    },
-    {
-      "Sid": "Stmt1653879416783",
-      "Action": [
-        "elasticbeanstalk:UpdateEnvironment"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:aws:elasticbeanstalk:us-west-2:593526201844:environment/*"
+      "Resource": "arn:aws:elasticbeanstalk:us-west-2:593526201844:applicationversion/*"
     },
     {
       "Action": [
@@ -76,6 +74,11 @@ resource "aws_iam_role_policy" "timeoff_mgmt_policy" {
   ]
 }
 POLICY
+}
+
+resource "aws_iam_role_policy_attachment" "beanstalk_updates_attachment" {
+  role       = aws_iam_role.codebuild_role.name
+  policy_arn = data.aws_iam_policy.beanstalk_updates.arn
 }
 
 resource "aws_codebuild_project" "cicd_timeoff" {
